@@ -99,7 +99,7 @@ func main() {
 		
 		fmt.Println("Post request recieved. It's payload ->")
 		fmt.Println("Address:" + b.Address);
-		fmt.Println("Contract:" + b.Address);
+		fmt.Println("Contract:" + b.Contract);
 
 		// @section2: creating a post request to our heroku api
 		x := new(bytes.Buffer)
@@ -117,8 +117,8 @@ func main() {
 		fmt.Println("Post request to heroku working. It's response payload ->")
 		fmt.Println("Balance:" + bar.Balance)
 
-		//
-
+		// @section3: sending back to the user a JSON payload
+		json.NewEncoder(w).Encode(bar)
 	})
 
 	fmt.Println("Listening");
