@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"fmt"
 	"html/template"
+	"bytes"
+	"io/ioutil"
 )
 
 // create a struct that holds information to be displayed in our HTML file
@@ -39,6 +41,35 @@ func main() {
 	http.HandleFunc("/test-post" , func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		response := &JsonResponse{Data: "hello"}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			panic(err)
+		}
+	})
+
+	// posting to to retrieve balances info https://web3-challenge-heroku.herokuapp.com/balances
+	http.HandleFunc("/balances" , func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("request info", r)
+
+		var jsonStr = []byte(`{}`)
+		req, error := http.NewRequest("POST", "https://web3-challenge-heroku.herokuapp.com/balances", bytes.NewBuffer(jsonStr))
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{}
+    resp, error := client.Do(req)
+    if error != nil {
+        panic(error)
+    }
+		defer resp.Body.Close()
+		
+		fmt.Println("response Status:", resp.Status)
+    fmt.Println("response Headers:", resp.Header)
+    body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Println("response Body:", string(body))
+
+		//orig
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		response := &JsonResponse{Data: string(body)}
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			panic(err)
 		}
