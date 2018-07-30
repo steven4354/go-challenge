@@ -97,23 +97,28 @@ func main() {
 			return
 		}
 		
-		// @section2: creating a post request to our heroku api
-		var jsonStr = []byte(`{"Address":"` + b.Address + `",` + `"Contract":"` + b.Contract + `"}`)
-		req, error := http.NewRequest("POST", "https://web3-challenge-heroku.herokuapp.com/balances", bytes.NewBuffer(jsonStr))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
+		fmt.Println("Post request recieved. It's payload ->")
+		fmt.Println("Address:" + b.Address);
+		fmt.Println("Contract:" + b.Address);
 
-    client := &http.Client{}
-    resp, error := client.Do(req)
-    if error != nil {
-        panic(error)
-    }
-		defer resp.Body.Close()
+		// @section2: creating a post request to our heroku api
+		x := new(bytes.Buffer)
+		json.NewEncoder(x).Encode(b)
+		res, _ := http.Post("https://web3-challenge-heroku.herokuapp.com/balances", "application/json; charset=utf-8", x)
 		
-		fmt.Println("response Status:", resp.Status)
-    fmt.Println("response Headers:", resp.Header)
-    body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("response Body:", string(body))
+		type BalancesAPIResponse struct{
+			Balance string
+		}
+
+		var bar BalancesAPIResponse
+
+		json.NewDecoder(res.Body).Decode(&bar)
+
+		fmt.Println("Post request to heroku working. It's response payload ->")
+		fmt.Println("Balance:" + bar.Balance)
+
+		//
+
 	})
 
 	fmt.Println("Listening");
