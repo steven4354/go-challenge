@@ -1,13 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"fmt"
 	"html/template"
 )
 
-//Create a struct that holds information to be displayed in our HTML file
+// create a struct that holds information to be displayed in our HTML file
 type TemplateData struct {}
+
+// struct for json responses
+type JsonResponse struct {
+	// Reserved field to add some meta information to the API response
+	Meta interface{} `json:"meta"`
+	Data interface{} `json:"data"`
+}
 
 func main() {	
 	templates := template.Must(template.ParseFiles("templates/welcome-template.html"))
@@ -25,6 +33,15 @@ func main() {
 		 if err := templates.ExecuteTemplate(w, "welcome-template.html", templateData); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 		 }
+	})
+
+	// test post route
+	http.HandleFunc("/test-post" , func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		response := &JsonResponse{Data: "hello"}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			panic(err)
+		}
 	})
 
 	fmt.Println("Listening");
